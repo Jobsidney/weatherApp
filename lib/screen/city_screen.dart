@@ -62,14 +62,11 @@ class _CityScreenState extends State<CityScreen> {
                   },
                 ),
               ),
-              FlatButton(
+              ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context, cityName);
                 },
-                child: Text(
-                  'Get Weather',
-                  style: kButtonTextStyle,
-                ),
+                child: Text('Get Weather', style: kButtonTextStyle),
               ),
             ],
           ),

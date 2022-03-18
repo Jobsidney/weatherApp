@@ -128,7 +128,7 @@ class _LocationScreenState extends State<LocationScreen> {
                             Row(
                               children: <Widget>[
                                 Text(
-                                  '${temperature}°',
+                                  '${temperature}°C',
                                   style: kTempTextStyle,
                                 ),
                                 Text(
@@ -183,9 +183,7 @@ class _LocationScreenState extends State<LocationScreen> {
                               onPressed: () {
                                 Navigator.push(context,
                                     MaterialPageRoute(builder: (context) {
-                                  return LastScreen(
-                                      // weatherData: weatherFutureForecastDay,
-                                      );
+                                  return LastScreen();
                                 }));
                               })
                         ],

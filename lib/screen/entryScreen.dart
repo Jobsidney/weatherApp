@@ -1,39 +1,94 @@
 import 'package:climate_app/constants.dart';
 import 'package:climate_app/screen/location_screen.dart';
+import 'package:climate_app/services/networking.dart';
+import 'package:climate_app/services/weather.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+
+const apiKey = '996ab4186a492e9d6258bec0b099d91c';
 
 class LastScreen extends StatefulWidget {
-  LastScreen({@required this.weatherData});
-  final weatherData;
+  LastScreen({@required this.weatherData2});
+  final weatherData2;
   @override
   _LastScreenState createState() => _LastScreenState();
 }
 
 class _LastScreenState extends State<LastScreen> {
-  // WeatherModel weather = WeatherModel();
-  var temperature;
+  WeatherModel weather = WeatherModel();
+  var temperature = 0;
   var mainCond;
+  var mainCondDescription;
   var weatherIcon;
   var cityName;
   var getTheMessage;
   var hourlyTimeDay;
   var hourlyTimeNight;
   var weatherDescription;
+  var humidity;
+  var visibility;
+  // double? latitude;
+  // double? longitude;
+  // Future getLocationWeather() async {
+  //   LocationPermission permission = await Geolocator.requestPermission();
+  //   LocationPermission.always;
+  //   Position position = await Geolocator.getCurrentPosition(
+  //       desiredAccuracy: LocationAccuracy.low);
+  //   latitude = position.latitude;
+  //   longitude = position.longitude;
+  //   NetworkingHelper networkingHelper = NetworkingHelper(
+  //       'http://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=$apiKey&units=metric');
+  //
+  //   var weatherData = await networkingHelper.getData();
+  //   print(weatherData);
+  //
+  //   return weatherData;
+  // }
+
+  var longitude;
+  var latitude;
+  var feels_like;
   @override
+//here is were all data that needs to be loaded before the app runs is placed ie API data
+
   void initState() {
-    updateUI(widget.weatherData);
     super.initState();
+    getLocationWeather();
   }
 
-  Future updateUI(weatherFutureForecastDay) async {
+  Future getLocationWeather() async {
+    LocationPermission permission = await Geolocator.requestPermission();
+    LocationPermission.always;
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.low);
+    latitude = position.latitude;
+    longitude = position.longitude;
+    NetworkingHelper networkingHelper = NetworkingHelper(
+        'http://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=$apiKey&units=metric');
+
+    var weatherData = await networkingHelper.getData();
+
+    return updateUI(weatherData);
+  }
+
+  Future updateUI(weatherData) async {
     setState(() {
-      hourlyTimeDay = weatherFutureForecastDay['sys']['sunrise'];
-      hourlyTimeNight = weatherFutureForecastDay['sys']['sunset'];
-      double temp = weatherFutureForecastDay['list'][0]['temp']['day'];
+      hourlyTimeDay = weatherData['sys']['sunrise'];
+      hourlyTimeNight = weatherData['sys']['sunset'];
+      double temp = weatherData['main']['temp'];
       temperature = temp.toInt();
       print(temperature);
-      mainCond = weatherFutureForecastDay['weather'][0]['id'];
+      mainCond = weatherData['weather'][0]['id'];
+      mainCondDescription = weatherData['weather'][0]['main'];
+
+      weatherIcon = weather.getWeatherIcon(mainCond);
+      cityName = weatherData['name'];
+      getTheMessage = weather.getMessage(temperature);
+      weatherDescription = weatherData['weather'][0]['description'];
+      humidity = weatherData['main']['humidity'];
+      feels_like = weatherData['main']['feels_like'];
+      visibility = weatherData['visibility'];
       // weatherIcon = weather.getWeatherIcon(mainCond);
       // cityName = weatherData['name'];
       // getTheMessage = weather.getMessage(temperature);
@@ -72,11 +127,11 @@ class _LastScreenState extends State<LastScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '21°',
+                                  '${temperature}°C',
                                   style: kTempTextStyle,
                                 ),
                                 Text(
-                                  'Mostly clouds',
+                                  '$weatherDescription',
                                   style: TextStyle(fontSize: 20.0),
                                 )
                               ],
@@ -173,15 +228,15 @@ class _LastScreenState extends State<LastScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             ColumnAdditional(
-                              reading: 'level3',
-                              condition: 'NE',
+                              reading: '$visibility',
+                              condition: 'Visibility',
                             ),
                             ColumnAdditional(
-                              reading: '67%',
+                              reading: '${humidity}%',
                               condition: 'Humidity',
                             ),
                             ColumnAdditional(
-                              reading: '19.0',
+                              reading: '${feels_like}°C',
                               condition: 'Feels like',
                             ),
                           ],
@@ -245,7 +300,10 @@ class _LastScreenState extends State<LastScreen> {
                         ),
                         Expanded(
                           child: ElevatedButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                // var url = "https://github.com/Jobsidney";
+                                // launchLink(url);
+                              },
                               child: Text('More Weather Forecast')),
                         )
                       ],
@@ -312,3 +370,8 @@ class DayForecastWidget extends StatelessWidget {
     );
   }
 }
+
+// launchLink(String url) async {
+//   // await launch(url);
+//   await html.window.open(url, 'name');
+// }
